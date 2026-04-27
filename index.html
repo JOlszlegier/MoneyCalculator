@@ -88,6 +88,8 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        cursor: pointer;
+        user-select: none;
       }
 
       .card-header .icon {
@@ -99,6 +101,26 @@
         font-size: 17px;
         color: #fff;
         flex: 1;
+      }
+
+      .card-header .chevron {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.6);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card.collapsed .chevron {
+        transform: rotate(-90deg);
+      }
+
+      .services-list {
+        overflow: hidden;
+        max-height: 2000px;
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card.collapsed .services-list {
+        max-height: 0;
       }
 
       .services-list {
@@ -501,9 +523,10 @@
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-        <div class="card-header">
+        <div class="card-header" onclick="toggleCard(this)">
           <span class="icon">${group.icon}</span>
           <span class="label">${group.label}</span>
+          <span class="chevron">▼</span>
         </div>
         <div class="services-list"></div>
       `;
@@ -525,6 +548,10 @@
             list.appendChild(row);
           });
         });
+      }
+
+      function toggleCard(header) {
+        header.closest(".card").classList.toggle("collapsed");
       }
 
       function change(idx, delta) {

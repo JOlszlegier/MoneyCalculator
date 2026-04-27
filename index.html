@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lista</title>
+  <style>
+    body { font-family: sans-serif; padding: 16px; }
+    .item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    button { width: 32px; height: 32px; }
+    .total { margin-top: 16px; font-size: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div id="list"></div>
+<div class="total">Suma: <span id="total">0</span> zł</div>
+
+<script>
+const KEY = "items"
+
+// statyczna lista (możesz zmienić)
+const defaultItems = [
+  { id: 1, name: "Produkt A", value: 5, count: 0 },
+  { id: 2, name: "Produkt B", value: 3, count: 0 },
+]
+
+// init
+let items = JSON.parse(localStorage.getItem(KEY)) || defaultItems
+
+const save = () => localStorage.setItem(KEY, JSON.stringify(items))
+
+const inc = (id) => {
+  items = items.map(i => i.id === id ? { ...i, count: i.count + 1 } : i)
+  update()
+}
+
+const dec = (id) => {
+  items = items.map(i => i.id === id ? { ...i, count: Math.max(0, i.count - 1) } : i)
+  update()
+}
+
+const calcTotal = () =>
+  items.reduce((sum, i) => sum + i.value * i.count, 0)
+
+const render = () => {
+  const list = document.getElementById("list")
+  list.innerHTML = ""
+
+  items.forEach(i => {
+    const div = document.createElement("div")
+    div.className = "item"
+
+    div.innerHTML = `
+      <span>${i.name} (${i.value} zł)</span>
+      <button onclick="dec(${i.id})">-</button>
+      <span>${i.count}</span>
+      <button onclick="inc(${i.id})">+</button>
+    `
+
+    list.appendChild(div)
+  })
+
+  document.getElementById("total").innerText = calcTotal()
+}
+
+const update = () => {
+  save()
+  render()
+}
+
+render()
+</script>
+
+</body>
+</html>

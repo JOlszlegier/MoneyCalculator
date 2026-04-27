@@ -1,76 +1,595 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lista</title>
-  <style>
-    body { font-family: sans-serif; padding: 16px; }
-    .item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-    button { width: 32px; height: 32px; }
-    .total { margin-top: 16px; font-size: 20px; font-weight: bold; }
-  </style>
-</head>
-<body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dental Earnings Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-<div id="list"></div>
-<div class="total">Suma: <span id="total">0</span> zł</div>
+      :root {
+        --cream: #faf7f2;
+        --warm-white: #fffcf7;
+        --sage: #5c7a6e;
+        --sage-light: #8aad9f;
+        --sage-dark: #3d5c52;
+        --gold: #c9a84c;
+        --gold-light: #e8c97a;
+        --ink: #1e2a26;
+        --ink-soft: #4a5c56;
+        --border: #ddd8ce;
+        --shadow: rgba(60, 80, 70, 0.1);
+      }
 
-<script>
-const KEY = "items"
+      body {
+        font-family: "DM Sans", sans-serif;
+        background-color: var(--cream);
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 32px 16px 80px;
+      }
 
-// statyczna lista (możesz zmienić)
-const defaultItems = [
-  { id: 1, name: "Produkt AB", value: 5, count: 0 },
-  { id: 2, name: "Produkt B", value: 3, count: 0 },
-]
+      header {
+        text-align: center;
+        margin-bottom: 36px;
+      }
 
-// init
-let items = JSON.parse(localStorage.getItem(KEY)) || defaultItems
+      header .eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--sage);
+        margin-bottom: 8px;
+      }
 
-const save = () => localStorage.setItem(KEY, JSON.stringify(items))
+      header h1 {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(28px, 6vw, 42px);
+        color: var(--ink);
+        line-height: 1.1;
+      }
 
-const inc = (id) => {
-  items = items.map(i => i.id === id ? { ...i, count: i.count + 1 } : i)
-  update()
-}
+      header h1 em {
+        font-style: italic;
+        color: var(--sage);
+      }
 
-const dec = (id) => {
-  items = items.map(i => i.id === id ? { ...i, count: Math.max(0, i.count - 1) } : i)
-  update()
-}
+      header .subtitle {
+        margin-top: 10px;
+        font-size: 14px;
+        color: var(--ink-soft);
+        font-weight: 300;
+      }
 
-const calcTotal = () =>
-  items.reduce((sum, i) => sum + i.value * i.count, 0)
+      .card {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        max-width: 520px;
+        margin: 0 auto 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px var(--shadow);
+      }
 
-const render = () => {
-  const list = document.getElementById("list")
-  list.innerHTML = ""
+      .card-header {
+        background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-  items.forEach(i => {
-    const div = document.createElement("div")
-    div.className = "item"
+      .card-header .icon {
+        font-size: 20px;
+      }
 
-    div.innerHTML = `
-      <span>${i.name} (${i.value} zł)</span>
-      <button onclick="dec(${i.id})">-</button>
-      <span>${i.count}</span>
-      <button onclick="inc(${i.id})">+</button>
-    `
+      .card-header .label {
+        font-family: "DM Serif Display", serif;
+        font-size: 17px;
+        color: #fff;
+        flex: 1;
+      }
 
-    list.appendChild(div)
-  })
+      .services-list {
+        padding: 8px 0;
+      }
 
-  document.getElementById("total").innerText = calcTotal()
-}
+      .service-row {
+        display: flex;
+        align-items: center;
+        padding: 11px 20px;
+        border-bottom: 1px solid var(--border);
+        gap: 12px;
+        transition: background 0.15s;
+      }
 
-const update = () => {
-  save()
-  render()
-}
+      .service-row:last-child {
+        border-bottom: none;
+      }
+      .service-row:hover {
+        background: #f5f1ea;
+      }
 
-render()
-</script>
+      .service-name {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--ink);
+      }
 
-</body>
+      .counter {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: var(--cream);
+        border: 1.5px solid var(--border);
+        border-radius: 30px;
+        overflow: hidden;
+      }
+
+      .counter button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+        color: var(--sage-dark);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.12s,
+          color 0.12s;
+        line-height: 1;
+      }
+
+      .counter button:hover {
+        background: var(--sage-light);
+        color: #fff;
+      }
+      .counter button:active {
+        background: var(--sage-dark);
+        color: #fff;
+      }
+
+      .counter .count {
+        min-width: 28px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink);
+        user-select: none;
+      }
+
+      /* Calculate button */
+      .calc-wrap {
+        max-width: 520px;
+        margin: 0 auto 20px;
+      }
+
+      .calc-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        color: var(--ink);
+        font-family: "DM Serif Display", serif;
+        font-size: 19px;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        box-shadow: 0 4px 18px rgba(201, 168, 76, 0.28);
+        transition:
+          transform 0.12s,
+          box-shadow 0.12s;
+      }
+
+      .calc-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 24px rgba(201, 168, 76, 0.38);
+      }
+      .calc-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Result panel */
+      .result-panel {
+        max-width: 520px;
+        margin: 0 auto;
+        background: var(--ink);
+        border-radius: 18px;
+        padding: 28px 28px 24px;
+        color: #fff;
+        display: none;
+        box-shadow: 0 8px 32px rgba(30, 42, 38, 0.22);
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-panel.visible {
+        display: block;
+      }
+
+      .result-title {
+        font-family: "DM Serif Display", serif;
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sage-light);
+        margin-bottom: 18px;
+      }
+
+      .result-breakdown {
+        list-style: none;
+        margin-bottom: 18px;
+      }
+
+      .result-breakdown li {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        color: rgba(255, 255, 255, 0.72);
+      }
+      .result-breakdown li:last-child {
+        border-bottom: none;
+      }
+      .result-breakdown li .r-name {
+        font-weight: 400;
+      }
+      .result-breakdown li .r-amt {
+        font-weight: 600;
+        color: var(--gold-light);
+      }
+
+      .result-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-top: 6px;
+      }
+
+      .result-total .t-label {
+        font-family: "DM Serif Display", serif;
+        font-size: 16px;
+        color: #fff;
+      }
+
+      .result-total .t-amount {
+        font-family: "DM Serif Display", serif;
+        font-size: 30px;
+        color: var(--gold-light);
+        letter-spacing: -0.02em;
+      }
+
+      .reset-btn {
+        margin-top: 16px;
+        width: 100%;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .reset-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+      }
+
+      .empty-note {
+        text-align: center;
+        font-size: 13px;
+        color: var(--sage-light);
+        padding: 12px 0 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="eyebrow">Kalkulator kasy</div>
+      <h1>My <em>dental</em> pay</h1>
+      <div class="subtitle">
+        Wybierz ile usług wykonałaś danego dnia a potem naciśnij Calculate
+      </div>
+    </header>
+
+    <div id="services-container"></div>
+
+    <div class="calc-wrap">
+      <button class="calc-btn" onclick="calculate()">
+        ✦ Calculate My Earnings
+      </button>
+    </div>
+
+    <div class="result-panel" id="result-panel">
+      <div class="result-title">Your earnings breakdown</div>
+      <ul class="result-breakdown" id="result-breakdown"></ul>
+      <div class="result-total">
+        <span class="t-label">Total</span>
+        <span class="t-amount" id="result-total">0 zł</span>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">
+        ↺ Reset & start over
+      </button>
+    </div>
+
+    <script>
+      const GROUPS = [
+        {
+          label: "Stomatologia zachowawcza",
+          icon: "🦷",
+          services: [
+            { name: "Badanie jamy ustnej", price: 85 },
+            { name: "Badanie jamy ustnej przy okazji leczenia", price: 75 },
+            { name: "Wypełnienie – ubytek nieskomplikowany mały", price: 150 },
+            { name: "Wypełnienie – ubytek nieskomplikowany duży", price: 160 },
+            {
+              name: "Wypełnienie – ubytek skomplikowany 2 pow. mały",
+              price: 170,
+            },
+            {
+              name: "Wypełnienie – ubytek skomplikowany 2 pow. duży",
+              price: 180,
+            },
+            { name: "Wypełnienie przyszyjkowy – kolejny", price: 75 },
+            { name: "Odbudowa całego zęba – 3 pow. i więcej", price: 200 },
+            { name: "Bezpośredni nakład kompozytowy", price: 250 },
+            { name: "Estet. odbudowa zębów siecznych", price: 250 },
+            { name: "Opatrunek w zębie", price: 120 },
+            {
+              name: "Pokrycie bezpośrednie skaleczenia miazgi – MTA",
+              price: 45,
+            },
+            { name: "Amputacja przyz. częściowa – Biodentine", price: 180 },
+            { name: "Amputacja przyz. całkowita – Biodentine", price: 185 },
+            {
+              name: "Amputacja przyz. częściowa z odbudową ściany",
+              price: 245,
+            },
+            {
+              name: "Amputacja przyz. całkowita z odbudową ściany",
+              price: 250,
+            },
+            { name: "Przygotowanie zęba do leczenia kanałowego", price: 190 },
+            { name: "Wizyta bólowa – trepanacja komory", price: 130 },
+            { name: "Wizyta bólowa – wypisanie antybiotyku", price: 50 },
+            {
+              name: "Pokrycie pośrednie miazgi Biodentine bez odbudowy",
+              price: 170,
+            },
+            {
+              name: "Pokrycie bezpośrednie miazgi Biodentine bez odbudowy",
+              price: 175,
+            },
+            {
+              name: "Pokrycie pośrednie miazgi Biodentine z odbudową",
+              price: 235,
+            },
+            {
+              name: "Pokrycie bezpośrednie miazgi Biodentine z odbudową",
+              price: 240,
+            },
+          ],
+        },
+        {
+          label: "Stomatologia dziecięca",
+          icon: "👶",
+          services: [
+            { name: "Wizyta adaptacyjna", price: 90 },
+            { name: "Badanie z instruktażem higieny", price: 90 },
+            { name: "Badanie z fluoryzacją", price: 100 },
+            { name: "Fluoryzacja przy okazji leczenia", price: 25 },
+            { name: "Lakowanie", price: 130 },
+            { name: "Impregnacja zębów mlecz. – łuk", price: 50 },
+            { name: "Zabieg w sedacji", price: 100 },
+            { name: "Pierwszy zabieg w sedacji z maseczką", price: 100 },
+            { name: "Wypełnienie zęba mlecznego małe", price: 100 },
+            { name: "Wypełnienie zęba mlecznego średnie", price: 110 },
+            { name: "Wypełnienie zęba mlecznego duże", price: 130 },
+            { name: "Amputacja mort. zęba mlecz.", price: 45 },
+            { name: "Wypełnienie zęba mlecz. po amputacji", price: 130 },
+            { name: "Opatrunek leczniczy", price: 75 },
+            { name: "Wydłużenie wizyty o każde 10 min", price: 35 },
+          ],
+        },
+        {
+          label: "Chirurgia",
+          icon: "⚕️",
+          services: [
+            { name: "Konsultacja chirurgiczna", price: 125 },
+            { name: "Konsultacja implantoprotetyczna", price: 125 },
+            { name: "Ekstrakcja siekacza / kła", price: 175 },
+            { name: "Ekstrakcja siekacza / kła – chirurg", price: 200 },
+            { name: "Ekstrakcja przedtrzonowca", price: 200 },
+            { name: "Ekstrakcja przedtrzonowca – chirurg", price: 225 },
+            { name: "Ekstrakcja trzonowca", price: 225 },
+            { name: "Ekstrakcja zęba rozchwianego", price: 150 },
+            { name: "Ekstrakcja mnoga (pow. 4 zębów)", price: 110 },
+            {
+              name: "Usunięcie zęba mlecznego z resorpcją korzeni",
+              price: 110,
+            },
+            {
+              name: "Usunięcie zęba mlecznego bez resorpcji korzeni",
+              price: 150,
+            },
+            { name: "Gingiwoplastyka", price: 150 },
+            { name: "Nacięcie ropnia z drenażem", price: 160 },
+            { name: "Zamknięcie połączenia ustno-zatokowego", price: 145 },
+            { name: "Szycie rany", price: 75 },
+            { name: "Wycięcie zmian z bad. histopat.", price: 165 },
+            { name: "Opatrunek chirurgiczny", price: 85 },
+            { name: "Wizyta kontrolna", price: 80 },
+            { name: "Zdjęcie szwów (poza gabinetem)", price: 55 },
+          ],
+        },
+        {
+          label: "Higienizacja",
+          icon: "✨",
+          services: [
+            { name: "Pakiet higienizacyjny standardowy", price: 150 },
+            { name: "Pakiet higienizacyjny dzieci do 16 r.ż.", price: 100 },
+            { name: "Pakiet higienizacyjny + badanie", price: 170 },
+            { name: "Piaskowanie osadów", price: 100 },
+            { name: "Skaling", price: 90 },
+            { name: "ICON", price: 120 },
+          ],
+        },
+        {
+          label: "RTG",
+          icon: "🔬",
+          services: [
+            { name: "Zdjęcie zęba punktowe", price: 15 },
+            { name: "Zdjęcie panorama", price: 60 },
+            { name: "Zdjęcie OPG + skrzydłowo-zgryzowe", price: 75 },
+            { name: "CBCT małe", price: 75 },
+            { name: "CBCT 1 łuk", price: 100 },
+            { name: "CBCT duże", price: 200 },
+          ],
+        },
+        {
+          label: "Ortodoncja",
+          icon: "😁",
+          services: [{ name: "Nastawienie stawu s-ż", price: 125 }],
+        },
+      ];
+
+      const CURRENCY = "zł";
+
+      // Flatten for indexing
+      const SERVICES = GROUPS.flatMap((g) => g.services);
+      const counts = new Array(SERVICES.length).fill(0);
+
+      function buildUI() {
+        const container = document.getElementById("services-container");
+        let globalIdx = 0;
+
+        GROUPS.forEach((group) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+        <div class="card-header">
+          <span class="icon">${group.icon}</span>
+          <span class="label">${group.label}</span>
+        </div>
+        <div class="services-list"></div>
+      `;
+          container.appendChild(card);
+
+          const list = card.querySelector(".services-list");
+          group.services.forEach((s) => {
+            const i = globalIdx++;
+            const row = document.createElement("div");
+            row.className = "service-row";
+            row.innerHTML = `
+          <span class="service-name">${s.name}</span>
+          <div class="counter">
+            <button onclick="change(${i}, -1)">−</button>
+            <span class="count" id="count-${i}">0</span>
+            <button onclick="change(${i}, +1)">+</button>
+          </div>
+        `;
+            list.appendChild(row);
+          });
+        });
+      }
+
+      function change(idx, delta) {
+        counts[idx] = Math.max(0, counts[idx] + delta);
+        document.getElementById(`count-${idx}`).textContent = counts[idx];
+        // hide result if user changes counts
+        document.getElementById("result-panel").classList.remove("visible");
+      }
+
+      function calculate() {
+        const breakdown = [];
+        let total = 0;
+
+        SERVICES.forEach((s, i) => {
+          if (counts[i] > 0) {
+            const earned = counts[i] * s.price;
+            total += earned;
+            breakdown.push({
+              name: `${s.name} × ${counts[i]}`,
+              amt: earned,
+            });
+          }
+        });
+
+        const panel = document.getElementById("result-panel");
+        const ul = document.getElementById("result-breakdown");
+        const totalEl = document.getElementById("result-total");
+
+        if (breakdown.length === 0) {
+          ul.innerHTML = `<li><span class="empty-note">No services selected yet.</span></li>`;
+          totalEl.textContent = `0 ${CURRENCY}`;
+        } else {
+          ul.innerHTML = breakdown
+            .map(
+              (b) =>
+                `<li><span class="r-name">${b.name}</span><span class="r-amt">${fmt(b.amt)}</span></li>`,
+            )
+            .join("");
+          totalEl.textContent = fmt(total);
+        }
+
+        panel.classList.add("visible");
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function resetAll() {
+        counts.fill(0);
+        SERVICES.forEach((_, i) => {
+          document.getElementById(`count-${i}`).textContent = "0";
+        });
+        document.getElementById("result-panel").classList.remove("visible");
+      }
+
+      function fmt(n) {
+        return (
+          n.toLocaleString("pl-PL", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) +
+          " " +
+          CURRENCY
+        );
+      }
+
+      buildUI();
+    </script>
+  </body>
 </html>
